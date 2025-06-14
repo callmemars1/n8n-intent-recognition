@@ -5,9 +5,9 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
-export class ExampleCredentialsApi implements ICredentialType {
-	name = 'exampleCredentialsApi';
-	displayName = 'Example Credentials API';
+export class IntentRecognitionApi implements ICredentialType {
+	name = 'IntentRecognitionApi';
+	displayName = 'Intent Recognition API';
 
 	documentationUrl = 'https://your-docs-url';
 
