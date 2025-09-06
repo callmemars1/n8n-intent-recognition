@@ -1,59 +1,53 @@
 import {
-	IAuthenticateGeneric,
 	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
 
 export class IntentRecognitionApi implements ICredentialType {
-	name = 'IntentRecognitionApi';
+	name = 'intentRecognitionApi';
 	displayName = 'Intent Recognition API';
 
-	documentationUrl = 'https://your-docs-url';
+	documentationUrl = 'https://intents.smartynov.com';
 
 	properties: INodeProperties[] = [
-		// The credentials to get from user and save encrypted.
-		// Properties can be defined exactly in the same way
-		// as node properties.
 		{
-			displayName: 'User Name',
-			name: 'username',
+			displayName: 'URL',
+			name: 'url',
 			type: 'string',
-			default: '',
+			default: 'https://intents.smartynov.com',
+			description: 'The base URL of the Intent Recognition API',
 		},
 		{
-			displayName: 'Password',
-			name: 'password',
+			displayName: 'Project System Name',
+			name: 'systemName',
+			type: 'string',
+			default: '',
+			required: true,
+			description: 'The project system name for authentication',
+		},
+		{
+			displayName: 'API Key',
+			name: 'apiKey',
 			type: 'string',
 			typeOptions: {
 				password: true,
 			},
 			default: '',
+			required: true,
+			description: 'The API key for authentication',
 		},
 	];
-
-	// This credential is currently not used by any node directly
-	// but the HTTP Request node can use it to make requests.
-	// The credential is also testable due to the `test` property below
-	authenticate: IAuthenticateGeneric = {
-		type: 'generic',
-		properties: {
-			auth: {
-				username: '={{ $credentials.username }}',
-				password: '={{ $credentials.password }}',
-			},
-			qs: {
-				// Send this as part of the query string
-				n8n: 'rocks',
-			},
-		},
-	};
 
 	// The block below tells how this credential can be tested
 	test: ICredentialTestRequest = {
 		request: {
-			baseURL: 'https://example.com/',
-			url: '',
+			baseURL: '={{$credentials.url}}',
+			url: '/api/authcheck',
+			method: 'GET',
+			headers: {
+				'Authorization': '=Basic {{Buffer.from($credentials.systemName + ":" + $credentials.apiKey).toString("base64")}}',
+			},
 		},
 	};
 }

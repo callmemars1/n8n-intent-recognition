@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-intent-recognition",
-  "version": "0.1.10",
+  "version": "0.1.13",
   "description": "Intent Recognition",
   "keywords": [
     "n8n-community-node-package"
@@ -36,10 +36,11 @@
       "dist/credentials/IntentRecognitionApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/IntentRecognitionNode/IntentRecognition.node.js"
+      "dist/nodes/IntentRecognition/IntentRecognition.node.js"
     ]
   },
   "devDependencies": {
+    "@types/node": "^24.3.1",
     "@typescript-eslint/parser": "~8.32.0",
     "eslint": "^8.57.0",
     "eslint-plugin-n8n-nodes-base": "^1.16.3",
