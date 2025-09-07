@@ -155,12 +155,8 @@ export class IntentRecognition implements INodeType {
 	}
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		console.log('IntentRecognition: Starting execution');
 		const items = this.getInputData();
-		console.log('IntentRecognition: Got input data, items:', items.length);
-		
 		const credentials = await this.getCredentials('intentRecognitionApi');
-		console.log('IntentRecognition: Got credentials');
 		
 		// Debug: log credentials (excluding sensitive data)
 		if (!credentials.url || !credentials.systemName || !credentials.apiKey) {
@@ -181,11 +177,9 @@ export class IntentRecognition implements INodeType {
 		const numIntents = intents.length;
 		const totalOutputs = numIntents + 1; // +1 for fallback
 		let returnData: INodeExecutionData[][] = Array(totalOutputs).fill(0).map(() => []);
-		console.log('IntentRecognition: Initialized arrays, totalOutputs:', totalOutputs);
 
 		// Process each input item
 		for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
-			console.log('IntentRecognition: Processing item', itemIndex);
 			try {
 				const item = items[itemIndex];
 				const userMessage = this.getNodeParameter('userMessage', itemIndex) as string;
@@ -325,7 +319,6 @@ export class IntentRecognition implements INodeType {
 				}
 
 				// Route to appropriate output
-				console.log('IntentRecognition: Routing to output', outputIndex, 'for intent:', recognizedIntent);
 				returnData[outputIndex].push(processedItem);
 
 			} catch (error) {
@@ -358,11 +351,6 @@ export class IntentRecognition implements INodeType {
 			}
 		}
 
-		console.log('IntentRecognition: Execution completed, returning data with', returnData.length, 'outputs');
-		returnData.forEach((output, index) => {
-			console.log(`IntentRecognition: Output ${index} has ${output.length} items`);
-		});
-		
 		return returnData.length ? returnData : [[]];
 	}
 }

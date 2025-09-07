@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-intent-recognition",
-  "version": "0.1.13",
+  "version": "0.1.15",
   "description": "Intent Recognition",
   "keywords": [
     "n8n-community-node-package"
@@ -36,7 +36,8 @@
       "dist/credentials/IntentRecognitionApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/IntentRecognition/IntentRecognition.node.js"
+      "dist/nodes/IntentRecognition/IntentRecognition.node.js",
+      "dist/nodes/ConversationAppend/ConversationAppend.node.js"
     ]
   },
   "devDependencies": {
