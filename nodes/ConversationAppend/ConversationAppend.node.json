@@ -1,18 +1,1 @@
-{
-	"node": "n8n-nodes-intent-recognition.ConversationAppend",
-	"nodeVersion": "1.0",
-	"codex": {
-		"alias": ["conversation", "chat", "message", "append", "history"],
-		"categories": ["Communication"],
-		"subcategories": {
-			"Communication": ["Messaging"]
-		},
-		"resources": {
-			"primaryDocumentation": [
-				{
-					"url": "https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-intent-recognition/"
-				}
-			]
-		}
-	}
-}
+{}

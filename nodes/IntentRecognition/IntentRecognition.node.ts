@@ -76,7 +76,7 @@ export class IntentRecognition implements INodeType {
 					default: 'You are a helpful intent recognition assistant. Analyze the user message and determine the most appropriate intent.',
 					description: 'System prompt to guide intent recognition',
 					typeOptions: {
-						rows: 3,
+						rows: 10,
 					},
 				},
 				{
@@ -129,6 +129,63 @@ export class IntentRecognition implements INodeType {
 									placeholder: 'e.g., User wants to greet or say hello',
 									required: true,
 									description: 'Description of what this intent represents',
+									typeOptions: {
+										rows: 10,
+									},
+								},
+								{
+									displayName: 'Parameters',
+									name: 'params',
+									placeholder: 'Add Parameter',
+									type: 'fixedCollection',
+									default: { paramOptions: [] },
+									typeOptions: {
+										multipleValues: true,
+										sortable: true,
+									},
+									description: 'Parameters to extract for this intent',
+									options: [
+										{
+											name: 'paramOptions',
+											displayName: 'Parameter',
+											values: [
+												{
+													displayName: 'Parameter Key',
+													name: 'key',
+													type: 'string',
+													default: '',
+													placeholder: 'e.g., date, location, amount',
+													required: true,
+													description: 'Unique key for the parameter',
+												},
+												{
+													displayName: 'Parameter Name',
+													name: 'title',
+													type: 'string',
+													default: '',
+													placeholder: 'e.g., Departure Date',
+													required: true,
+													description: 'Human-readable name for the parameter',
+												},
+												{
+													displayName: 'Description',
+													name: 'description',
+													type: 'string',
+													default: '',
+													placeholder: 'e.g., The date when user wants to depart',
+													required: true,
+													description: 'Description of what this parameter represents',
+												},
+												{
+													displayName: 'Required',
+													name: 'required',
+													type: 'boolean',
+													default: true,
+													description: 'Whether this parameter is required for the intent to be complete',
+												},
+											],
+										},
+									],
 								},
 							],
 						},
@@ -171,6 +228,14 @@ export class IntentRecognition implements INodeType {
 			key: string;
 			name: string;
 			description: string;
+			params?: {
+				paramOptions?: Array<{
+					key: string;
+					title: string;
+					description: string;
+					required: boolean;
+				}>;
+			};
 		}>;
 		
 		// Initialize return data arrays
@@ -191,7 +256,13 @@ export class IntentRecognition implements INodeType {
 					intents: intents.map(intent => ({
 						key: intent.key,
 						name: intent.name,
-						description: intent.description
+						description: intent.description,
+						params: (intent.params?.paramOptions || []).map(param => ({
+							key: param.key,
+							title: param.title,
+							description: param.description,
+							required: param.required
+						}))
 					})),
 					prompt: systemPrompt
 				};
@@ -264,12 +335,16 @@ export class IntentRecognition implements INodeType {
 
 				let processResponse: {
 					intent?: string;
+					extracted_params?: Array<{Key: string; Value: any}>;
 					clarification_message?: string;
+					final: boolean;
 				};
 				try {
 					processResponse = await this.helpers.httpRequest(processOptions) as {
 						intent?: string;
+						extracted_params?: Array<{Key: string; Value: any}>;
 						clarification_message?: string;
+						final: boolean;
 					};
 				} catch (error) {
 					throw new NodeOperationError(
@@ -282,7 +357,9 @@ export class IntentRecognition implements INodeType {
 				// Determine output routing
 				let outputIndex: number = totalOutputs - 1; // Default to fallback
 				let recognizedIntent: string | null = null;
+				let extractedParams: Array<{Key: string; Value: any}> | null = null;
 				let clarificationMessage: string | null = null;
+				let isFinal: boolean = false;
 
 				if (processResponse.intent) {
 					// Find the intent index
@@ -290,8 +367,12 @@ export class IntentRecognition implements INodeType {
 					if (intentIndex >= 0) {
 						outputIndex = intentIndex;
 						recognizedIntent = processResponse.intent;
+						extractedParams = processResponse.extracted_params || null;
+						isFinal = processResponse.final || false;
 					}
-				} else if (processResponse.clarification_message) {
+				}
+				
+				if (processResponse.clarification_message) {
 					clarificationMessage = processResponse.clarification_message;
 				}
 
@@ -300,14 +381,18 @@ export class IntentRecognition implements INodeType {
 					json: {
 						...item.json,
 						recognizedIntent,
+						extractedParams,
 						clarificationMessage,
+						isFinal,
 						chatId,
 						userMessage,
 						settingsId,
 						metadata: {
 							processingTime: new Date().toISOString(),
 							hasIntent: !!recognizedIntent,
-							hasClarification: !!clarificationMessage
+							hasExtractedParams: !!extractedParams && extractedParams.length > 0,
+							hasClarification: !!clarificationMessage,
+							isFinal
 						}
 					},
 					pairedItem: { item: itemIndex },
@@ -330,11 +415,14 @@ export class IntentRecognition implements INodeType {
 							...items[itemIndex].json,
 							error: error.message,
 							recognizedIntent: null,
+							extractedParams: null,
 							clarificationMessage: null,
+							isFinal: false,
 							metadata: {
 								processingTime: new Date().toISOString(),
 								hasError: true,
-								errorMessage: error.message
+								errorMessage: error.message,
+								isFinal: false
 							}
 						}, 
 						pairedItem: { item: itemIndex }

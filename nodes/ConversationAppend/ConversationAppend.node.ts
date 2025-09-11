@@ -17,7 +17,7 @@ export class ConversationAppend implements INodeType {
 			...baseDescription,
 			displayName: 'Conversation Append',
 			name: 'conversationAppend',
-			icon: 'fa:comment-dots',
+			icon: 'file:icon.svg',
 			group: ['transform'],
 			version: 1,
 			subtitle: 'Append message to conversation history',
@@ -62,11 +62,6 @@ export class ConversationAppend implements INodeType {
 							value: 'user',
 							description: 'User message',
 						},
-						{
-							name: 'System',
-							value: 'system',
-							description: 'System message',
-						},
 					],
 					description: 'The role of the message sender',
 					required: true,
@@ -82,22 +77,6 @@ export class ConversationAppend implements INodeType {
 						rows: 4,
 					},
 				},
-				{
-					displayName: 'Options',
-					name: 'options',
-					type: 'collection',
-					placeholder: 'Add Option',
-					default: {},
-					options: [
-						{
-							displayName: 'Include Original Data',
-							name: 'includeOriginalData',
-							type: 'boolean',
-							default: true,
-							description: 'Whether to include original input data in the output',
-						},
-					],
-				},
 			],
 		};
 	}
@@ -106,7 +85,6 @@ export class ConversationAppend implements INodeType {
 		const items = this.getInputData();
 		const credentials = await this.getCredentials('intentRecognitionApi');
 		
-		// Validate credentials
 		if (!credentials.url || !credentials.systemName || !credentials.apiKey) {
 			throw new NodeOperationError(
 				this.getNode(),
